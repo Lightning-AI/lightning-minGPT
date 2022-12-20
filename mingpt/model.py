@@ -83,8 +83,10 @@ class Block(nn.Module):
             act     = NewGELU(),
             dropout = nn.Dropout(config.resid_pdrop),
         ))
+
+    def mlpf(self, x): 
         m = self.mlp
-        self.mlpf = lambda x: m.dropout(m.c_proj(m.act(m.c_fc(x)))) # MLP forward
+        return m.dropout(m.c_proj(m.act(m.c_fc(x)))) # MLP forward
 
     def forward(self, x):
         x = x + self.attn(self.ln_1(x))
