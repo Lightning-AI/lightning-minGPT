@@ -1,24 +1,26 @@
 from urllib.request import urlopen
 
 import torch
+import torch._dynamo
 from torch.utils.data import DataLoader
 
 import lightning as L
 from lightning_mingpt import data, models, bench
 
 
-class FSDPGPTBench(bench.Bench):
+class GPTBench(bench.Bench):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.num_workers = 4
         self.batch_size = 64
-        self.max_epochs = 5
-        self.precision = 16
-        self.model_type = "gpt2"
-        self.num_runs = 5
+        self.max_epochs = 3
+        self.precision = 32
+        self.model_type = "gpt2-micro"
+        self.num_runs = 3
 
     def create(self):
         torch.set_float32_matmul_precision("high")
+        torch._dynamo.config.suppress_errors = True
 
         with urlopen("https://cs.stanford.edu/people/karpathy/char-rnn/shakespeare_input.txt") as f:
             text = f.read()
@@ -47,12 +49,14 @@ class FSDPGPTBench(bench.Bench):
             enable_checkpointing=False,
             logger=False,
             replace_sampler_ddp=False,
+            num_sanity_val_steps=0,
+            reload_dataloaders_every_n_epochs=1000,
             strategy="fsdp_native",
         )
 
         trainer.fit(model, dataloader)
-        final_loss = trainer.fit_loop.running_loss.last().item()
-        return final_loss
+        final_loss = trainer.fit_loop.running_loss.last()
+        return final_loss.item() if final_loss is not None else None
 
     def run(self):
         model, dataloader = self.create()
@@ -62,12 +66,12 @@ class FSDPGPTBench(bench.Bench):
         model, dataloader = self.create()
         model = torch.compile(model)
 
-        self.run_benchmark("compile", self.train, args=(model, dataloader), num_runs=self.num_runs)
+        self.run_benchmark(name="compile", fn=self.train, args=(model, dataloader), num_runs=self.num_runs)
 
 
 app = L.LightningApp(
     bench.BenchRun(
-        FSDPGPTBench,
+        GPTBench,
         num_nodes=2,
         cloud_compute=L.CloudCompute("gpu-fast"),
     )

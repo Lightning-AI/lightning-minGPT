@@ -13,6 +13,7 @@ There are currently a few options:
 minGPT is vendored with the repo in the `mingpt` directory. Find the LICENSE for minGPT there.
 
 Thanks to:
+
 - @karpathy for the original minGPT implementation
 - @williamFalcon for the first Lightning port
 - @SeanNaren for the DeepSpeed pieces

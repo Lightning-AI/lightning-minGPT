@@ -11,12 +11,12 @@ from lightning_mingpt import data, models, bench
 class GPTBench(bench.Bench):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.num_workers = 0
+        self.num_workers = 4
         self.batch_size = 64
-        self.max_epochs = 2
+        self.max_epochs = 3
         self.precision = 32
         self.model_type = "gpt-micro"
-        self.num_runs = 2
+        self.num_runs = 3
 
     def create(self):
         torch.set_float32_matmul_precision("high")
@@ -59,24 +59,22 @@ class GPTBench(bench.Bench):
     def run(self):
         model, dataloader = self.create()
 
-        self.run_benchmark(
-            name="nocompile",
-            fn=self.train,
-            args=(model, dataloader),
-            num_runs=self.num_runs
-        )
+        self.run_benchmark(name="nocompile", fn=self.train, args=(model, dataloader), num_runs=self.num_runs)
 
         model, dataloader = self.create()
         model = torch.compile(model)
 
-        self.run_benchmark(
-            "compile",
-            self.train,
-            args=(model, dataloader),
-            num_runs=self.num_runs
-        )
+        self.run_benchmark(name="compile", fn=self.train, args=(model, dataloader), num_runs=self.num_runs)
 
+
+# app = L.LightningApp(
+#         GPTBench(cloud_compute=L.CloudCompute("gpu-fast"))
+#         )
 
 app = L.LightningApp(
-        GPTBench(cloud_compute=L.CloudCompute("gpu-fast"))
-        )
+    bench.BenchRun(
+        GPTBench,
+        num_nodes=1,
+        cloud_compute=L.CloudCompute("gpu-fast"),
+    )
+)
