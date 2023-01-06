@@ -22,7 +22,8 @@ Thanks to:
 - @SeanNaren for the DeepSpeed pieces
 
 ## Installation
-There are two main ways to install this package. 
+
+There are two main ways to install this package.
 
 Installation from source is preferred if you need the latest version with yet unreleased changes, want to use the provided benchmarking or training suites or need to adjust the package.
 
