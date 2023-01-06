@@ -21,13 +21,34 @@ Thanks to:
 - @williamFalcon for the first Lightning port
 - @SeanNaren for the DeepSpeed pieces
 
-## Installation from source
+## Installation
+There are two main ways to install this package. 
+
+Installation from source is preferred if you need the latest version with yet unreleased changes, want to use the provided benchmarking or training suites or need to adjust the package.
+
+Installation from PyPI is preferred if you just want to use a stable version of the package without any modifications.
+
+### Installation from PyPI
+
+To install the package, simply run
+
+```shell
+pip install lightning-gpt
+```
+
+### Installation from source
 
 To clone the repository, please clone the repo with
 
 ```shell
-git clone https://github.com/Lightning-AI/lightning-GPT
+git clone https://github.com/Lightning-AI/lightning-GPT && cd lightning-GPT
 git submodule update --init --recursive
+```
+
+and install with
+
+```shell
+pip install -e .
 ```
 
 After this you can proceed with the following steps.
